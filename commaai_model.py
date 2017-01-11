@@ -22,6 +22,9 @@ from PIL import Image, ImageEnhance, ImageOps
 import scipy.misc
 
 
+steering_camera_offset = 0.15
+
+
 path = '/data1/udacity/simulator/data'
 img_path = path +'/IMG'
 csv_file = path +'/driving_log.csv'
@@ -47,11 +50,11 @@ for line in csv_data:
   #X_full_name.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
   #y_full_angle.append(float(line[3])*-1)
   # add the left image
-  #X_full_name.append( path+'/'+line[1].decode('UTF-8').strip())
-  #y_full_angle.append(float(line[3])+0.25)
+  X_full_name.append( path+'/'+line[1].decode('UTF-8').strip())
+  y_full_angle.append(float(line[3])+steering_camera_offset)
   # add the right image
-  #X_full_name.append( path+'/'+line[0].decode('UTF-8').strip())
-  #y_full_angle.append(float(line[3])-0.25)
+  X_full_name.append( path+'/'+line[0].decode('UTF-8').strip())
+  y_full_angle.append(float(line[3])-steering_camera_offset)
   #print(X_full_name)
  
 
