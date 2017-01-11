@@ -70,8 +70,8 @@ print(len(X_full_name))
 
 
 def process_image(name):
-   top_crop = 50
-   bottom_crop = 140
+   top_crop = 55
+   bottom_crop = 135
    mean=0
    if 'flip' == name[0:4]:
       name = name[4:]
@@ -81,7 +81,7 @@ def process_image(name):
       image = cv2.imread(name)
 
    image = image[top_crop:bottom_crop, :, :]
-   image=cv2.copyMakeBorder(image, top=top_crop, bottom=160-bottom_crop , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
+   image=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
 
    return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)[0]
  
