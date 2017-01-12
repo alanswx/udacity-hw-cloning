@@ -3,6 +3,7 @@ import cv2
 import base64
 import json
 from sully_model import *
+import driving_data
 
 import numpy as np
 import socketio
@@ -19,6 +20,8 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 # Fix error with Keras and TensorFlow
 import tensorflow as tf
+
+
 tf.python.control_flow_ops = tf
 
 
@@ -40,7 +43,8 @@ def telemetry(sid, data):
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
     print(image_array.shape)
-    transformed_image_array  =  np.array([np.float32(cv2.resize(image_array, (200, 66) )) / 255.0 ])
+    transformed_image_array  =  np.array([driving_data.process_image_sully_pixels(image_array)])
+    #transformed_image_array  =  np.array([np.float32(cv2.resize(image_array, (200, 66) )) / 255.0 ])
     print(transformed_image_array.shape)
     
     #b = image_array[None, :, :, :].transpose(0, 3, 1, 2)
