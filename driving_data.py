@@ -64,6 +64,9 @@ def get_dataset():
     images= [np.float32(cv2.resize(cv2.imread(x, 1), (200, 66))) / 255.0 for x in train_xs]
     return images, train_ys
 
+#
+# fix this to either use a generator, or call through the proper functions
+#
 def get_validation_dataset():
     images= [np.float32(cv2.resize(cv2.imread(x, 1), (200, 66))) / 255.0 for x in val_xs]
     return np.array(images), np.array(val_ys)
@@ -120,7 +123,7 @@ def generator(X_items,y_items,batch_size,x_func=process_image_sully,y_func=sully
 
 
 
-
+'''
 def generate_arrays_from_file(path = "driving_dataset/data.txt"):
     gen_state = 0
     print ("Got lines!")
@@ -133,3 +136,4 @@ def generate_arrays_from_file(path = "driving_dataset/data.txt"):
         gen_state = gen_state + 100
         #print(X[0].shape)
         yield np.array(X), np.array(y)
+'''

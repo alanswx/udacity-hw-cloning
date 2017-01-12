@@ -19,6 +19,7 @@ from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array
 from keras.optimizers import Adam
 
+import driving_data
 # Fix error with Keras and TensorFlow
 import tensorflow as tf
 tf.python.control_flow_ops = tf
@@ -43,6 +44,8 @@ def telemetry(sid, data):
     image_array = np.asarray(image)
     print(image_array.shape)
 
+    transformed_image_array=driving_data.process_image_comma_pixels(image_array)
+    '''
     image_array = image_array[55:135, :, :]
     mean=0
     image_array=cv2.copyMakeBorder(image_array, top=55, bottom=25 , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
@@ -52,6 +55,7 @@ def telemetry(sid, data):
     print(b.shape)
 
     transformed_image_array = b
+    '''
     #transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
     print("about to call predict")

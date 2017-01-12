@@ -13,6 +13,8 @@ from keras.layers.convolutional import Convolution2D
 from sklearn.model_selection import train_test_split
 import cv2
 
+import driving_data
+
 #
 # open and look at the data we are going to use to train
 #
@@ -21,7 +23,7 @@ import numpy as np
 from PIL import Image, ImageEnhance, ImageOps
 import scipy.misc
 
-
+'''
 steering_camera_offset = 0.15
 
 
@@ -109,6 +111,7 @@ def generator(X_items,y_items,batch_size):
     #print(np.asarray(X).shape)
     #print(np.asarray(X[0]).shape)
     yield np.asarray(X), np.asarray(y)
+'''
 
 def get_model(time_len=1):
   ch, row, col = 3, 160, 320  # camera format
@@ -159,11 +162,11 @@ if __name__ == "__main__":
 
   model = get_model()
   res=model.fit_generator(
-    generator(X_train,y_train,args.batch),
-    samples_per_epoch=len(X_train),
+    driving_data.generator(driving_data.train_xs,driving_data.train_ys,args.batch,driving_data.process_image_comma,driving_data.comma_y_func),
+    samples_per_epoch=len(driving_data.train_xs),
     nb_epoch=args.epoch,
-    validation_data=generator(X_validation,y_validation,args.batch),
-    nb_val_samples=len(X_validation)
+    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch),
+    nb_val_samples=len(driving_data.val_xs)
   )
   print("Saving model weights and configuration file.")
 
