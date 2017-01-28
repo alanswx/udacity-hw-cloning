@@ -27,13 +27,26 @@ csv_file = path +'/driving_log.csv'
 # load the CSV so we can have labels
 csv_data=np.recfromcsv(csv_file, delimiter=',', filling_values=np.nan, case_sensitive=True, deletechars='', replace_space=' ')
 i  = 0
+remove = 0
 for line in csv_data:
   #print(line)
-  xs.append( path+'/'+line[0].decode('UTF-8').strip())
-  ys.append(float(line[3]))
+  # remove 90% of straight scenes
+  if (abs(float(line[3])) < 1e-5):
+    remove=remove+1
+    if (remove==10):
+      remove=0
+      xs.append( path+'/'+line[0].decode('UTF-8').strip())
+      ys.append(float(line[3]))
+  else:
+    xs.append( path+'/'+line[0].decode('UTF-8').strip())
+    ys.append(float(line[3]))
+#  xs.append( path+'/'+line[0].decode('UTF-8').strip())
+#  ys.append(float(line[3]))
+#  xs.append( path+'/'+line[0].decode('UTF-8').strip())
+#  ys.append(float(line[3]))
   # flip
-  #xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
-  #ys.append(float(line[3])*-1)
+#  xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
+#  ys.append(float(line[3])*-1)
   # add the left image
   xs.append( path+'/'+line[1].decode('UTF-8').strip())
   ys.append(float(line[3])+steering_camera_offset)
@@ -60,15 +73,22 @@ num_train_images = len(train_xs)
 num_val_images = len(val_xs)
 
 
-def get_dataset():
-    images= [np.float32(cv2.resize(cv2.imread(x, 1), (200, 66))) / 255.0 for x in train_xs]
+def get_dataset(func):
+    images= [func(x) for x in train_xs]
     return images, train_ys
 
 #
 # fix this to either use a generator, or call through the proper functions
 #
+'''
 def get_validation_dataset():
     images= [np.float32(cv2.resize(cv2.imread(x, 1), (200, 66))) / 255.0 for x in val_xs]
+    return np.array(images), np.array(val_ys)
+'''
+
+def get_validation_dataset(func):
+    #images= [np.float32(cv2.resize(cv2.imread(x, 1), (200, 66))) / 255.0 for x in val_xs]
+    images= [func(x) for x in val_xs]
     return np.array(images), np.array(val_ys)
 
 def process_image_comma_pixels(image):
@@ -77,9 +97,21 @@ def process_image_comma_pixels(image):
    mean=0
 
    image = image[top_crop:bottom_crop, :, :]
-   image=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
+   #image=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
 
-   return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)[0]
+   #return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)
+   (h, w) = image.shape[:2]
+   # black squares from Russian demo
+   rect_w = 25
+   rect_h = 25
+   rect_count = 30
+   for i in range (rect_count):
+        pt1 = (random.randint (0, w), random.randint (0, h))
+        pt2 = (pt1[0] + rect_w, pt1[1] + rect_h)
+        cv2.rectangle(image, pt1, pt2, (-0.5, -0.5, -0.5), -1)
+
+   image = cv2.resize(image, (320, 160) ) / 255.0 
+   return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)
 
 def process_image_comma(name):
    if 'flip' == name[0:4]:
@@ -88,18 +120,79 @@ def process_image_comma(name):
       image = cv2.flip(image, 1)
    else: 
       image = cv2.imread(name)
-   return process_image_comma_pixels(image)
+   return process_image_comma_pixels(image)[0]
 
 
-def process_image_sully_pixels(pixels):
+def process_image_sully_pixels(image):
+   top_crop = 55
+   bottom_crop = 135
+   mean=0
+
+   pixels = image[top_crop:bottom_crop, :, :]
+
+   (h, w) = image.shape[:2]
+   # black squares from Russian demo
+   rect_w = 25
+   rect_h = 25
+   rect_count = 30
+   for i in range (rect_count):
+        pt1 = (random.randint (0, w), random.randint (0, h))
+        pt2 = (pt1[0] + rect_w, pt1[1] + rect_h)
+        cv2.rectangle(pixels, pt1, pt2, (-0.5, -0.5, -0.5), -1)
+
+   #pixels=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
    return np.float32(cv2.resize(pixels, (200, 66) )) / 255.0 
 
+def process_image_gray_pixels(image):
+   top_crop = 55
+   bottom_crop = 135
+   mean=0
+
+   image = image[top_crop:bottom_crop, :]
+   #image=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
+
+   #return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)
+   (h, w) = image.shape[:2]
+   # black squares from Russian demo
+   rect_w = 25
+   rect_h = 25
+   rect_count = 30
+   for i in range (rect_count):
+        pt1 = (random.randint (0, w), random.randint (0, h))
+        pt2 = (pt1[0] + rect_w, pt1[1] + rect_h)
+        cv2.rectangle(image, pt1, pt2, (-0.5, -0.5, -0.5), -1)
+
+   image = cv2.resize(image, (320, 160) ) / 255.0 
+   return image
+
+def process_image_gray(name):
+   if 'flip' == name[0:4]:
+      name = name[4:]
+      image = cv2.imread(name,cv2.IMREAD_GRAYSCALE)
+      image = cv2.flip(image, 1)
+   else: 
+      image = cv2.imread(name,cv2.IMREAD_GRAYSCALE)
+   #print(name)
+   return process_image_gray_pixels(image)
+
+
+
 def process_image_sully(name):
-   return process_image_sully_pixels(cv2.imread(name, 1))
+   if 'flip' == name[0:4]:
+      name = name[4:]
+      image = cv2.imread(name)
+      image = cv2.flip(image, 1)
+   else: 
+      image = cv2.imread(name)
+   #print(name)
+   return process_image_sully_pixels(image)
  
 def comma_y_func(y):
-   return y * 180 / scipy.pi
+   #return y * 180 / scipy.pi
+   return y 
 def sully_y_func(y):
+   # russian - add noise to steering angle
+   y= y+ np.random.normal (0, 0.005)
    return y 
    
 def generator(X_items,y_items,batch_size,x_func=process_image_sully,y_func=sully_y_func):

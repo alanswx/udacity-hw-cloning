@@ -6,6 +6,7 @@ import os
 import argparse
 import json
 import pickle
+from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.layers import Dense, Dropout, Flatten, Lambda, ELU
@@ -115,6 +116,7 @@ def generator(X_items,y_items,batch_size):
 
 def get_model(time_len=1):
   ch, row, col = 3, 160, 320  # camera format
+  #ch, row, col = 3, 80, 160  # camera format
 
   model = Sequential()
   model.add(Lambda(lambda x: x/127.5 - 1.,
@@ -165,8 +167,8 @@ if __name__ == "__main__":
     driving_data.generator(driving_data.train_xs,driving_data.train_ys,args.batch,driving_data.process_image_comma,driving_data.comma_y_func),
     samples_per_epoch=len(driving_data.train_xs),
     nb_epoch=args.epoch,
-    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch),
-    nb_val_samples=len(driving_data.val_xs)
+    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch,driving_data.process_image_comma,driving_data.comma_y_func),
+    nb_val_samples=len(driving_data.val_xs), callbacks = [ EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=1, mode='auto')]
   )
   print("Saving model weights and configuration file.")
 

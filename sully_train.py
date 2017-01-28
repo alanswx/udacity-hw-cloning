@@ -9,15 +9,16 @@ import pickle
 
 #epochs=150
 #epochs=20
-epochs=5
-epochs=10
+#epochs=5
+#epochs=20
+epochs=12
 def train():
         model = get_model()
         weights_file="./outputs/sully_steering_model/steering_angle.h5"
         #model = load_model(weights_file)
 
         print ("Loaded model")
-        X, y = driving_data.get_validation_dataset()
+        X, y = driving_data.get_validation_dataset(driving_data.process_image_sully)
         print (model.summary())
         print ("Loaded validation datasetset")
         print ("Total of", len(y) * 4)

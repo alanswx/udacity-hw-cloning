@@ -45,7 +45,8 @@ def telemetry(sid, data):
     print(image_array.shape)
 
     transformed_image_array=driving_data.process_image_comma_pixels(image_array)
-    '''
+    print(transformed_image_array.shape)
+    ''' 
     image_array = image_array[55:135, :, :]
     mean=0
     image_array=cv2.copyMakeBorder(image_array, top=55, bottom=25 , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
@@ -55,12 +56,13 @@ def telemetry(sid, data):
     print(b.shape)
 
     transformed_image_array = b
-    '''
+    '''    
     #transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
     print("about to call predict")
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
-    steering_angle =  steering_angle * scipy.pi / 180 
+    print("after predict")
+    #steering_angle =  steering_angle * scipy.pi / 180 
     #steering_angle =  steering_angle * scipy.pi / 180 
    # steering_angle =  steering_angle / 2
     print("steering angle"+str(steering_angle))
@@ -104,6 +106,7 @@ if __name__ == '__main__':
         # then you will have to call:
         #
         model = model_from_json(json.loads(jfile.read()))
+        model.summary()
         #
         # instead.
         #model = model_from_json(jfile.read())
