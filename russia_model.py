@@ -147,15 +147,15 @@ if __name__ == "__main__":
  
   print(args.batch)
   checkpoint_path="weights.{epoch:02d}-{val_loss:.2f}.hdf5"
-  checkpoint = ModelCheckpoint(checkpoint_path, verbose=1, save_best_only=True, save_weights_only=False, mode='auto')
+  checkpoint = ModelCheckpoint(checkpoint_path, verbose=1, save_best_only=False, save_weights_only=False, mode='auto')
   earlyStop =  EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=1, mode='auto')
 
   model = get_model()
   res=model.fit_generator(
-    driving_data.generator(driving_data.train_xs,driving_data.train_ys,args.batch,driving_data.process_image_gray,driving_data.comma_y_func),
-    samples_per_epoch=len(driving_data.train_xs),
+    driving_data.generator(driving_data.train_xs,driving_data.train_ys,args.batch,driving_data.process_image_gray,driving_data.russia_y_func),
+    samples_per_epoch=len(driving_data.train_xs)*3,
     nb_epoch=args.epoch,
-    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch,driving_data.process_image_gray,driving_data.comma_y_func),
+    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch,driving_data.process_image_gray,driving_data.russia_y_func),
     nb_val_samples=len(driving_data.val_xs), callbacks = [ checkpoint]
   )
   print("Saving model weights and configuration file.")

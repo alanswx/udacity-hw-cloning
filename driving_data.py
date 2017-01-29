@@ -133,6 +133,10 @@ def process_image_comma_pixels(image):
 
     #return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)
     (h, w) = image.shape[:2]
+    #randomize brightness
+    brightness = random.uniform (-0.3, 0.3)
+    image = np.add(image, brightness)
+
     # black squares from Russian demo
     rect_w = 25
     rect_h = 25
@@ -196,6 +200,10 @@ def process_image_sully_pixels(image):
     pixels = image[top_crop:bottom_crop, :, :]
 
     (h, w) = image.shape[:2]
+    #randomize brightness
+    brightness = random.uniform (-0.3, 0.3)
+    image = np.add(image, brightness)
+
     # black squares from Russian demo
     rect_w = 25
     rect_h = 25
@@ -240,26 +248,60 @@ def process_image_sully_pixels(image):
     return np.float32(cv2.resize(pixels, (200, 66) )) / 255.0 
 
 def process_image_gray_pixels(image):
-   top_crop = 55
-   bottom_crop = 135
-   mean=0
+    top_crop = 55
+    bottom_crop = 135
+    mean=0
 
-   image = image[top_crop:bottom_crop, :]
-   #image=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
+    pixels = image[top_crop:bottom_crop, :]
 
-   #return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)
-   (h, w) = image.shape[:2]
-   # black squares from Russian demo
-   rect_w = 25
-   rect_h = 25
-   rect_count = 30
-   for i in range (rect_count):
+    (h, w) = image.shape[:2]
+    #randomize brightness
+    brightness = random.uniform (-0.3, 0.3)
+    image = np.add(image, brightness)
+
+    # black squares from Russian demo
+    rect_w = 25
+    rect_h = 25
+    rect_count = 30
+    for i in range (rect_count):
         pt1 = (random.randint (0, w), random.randint (0, h))
         pt2 = (pt1[0] + rect_w, pt1[1] + rect_h)
-        cv2.rectangle(image, pt1, pt2, (-0.5, -0.5, -0.5), -1)
+        cv2.rectangle(pixels, pt1, pt2, (-0.5, -0.5, -0.5), -1)
 
-   image = cv2.resize(image, (320, 160) ) / 255.0 
-   return image
+   #pixels=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
+    #rotation and scaling
+    rot = 1
+    scale = 0.02
+    Mrot = cv2.getRotationMatrix2D((h/2,w/2),random.uniform(-rot, rot), random.uniform(1.0 - scale, 1.0 + scale))
+
+    #affine transform and shifts
+    pts1 = np.float32([[0,0],[w,0],[w,h]])
+    a = 0
+    shift = 2
+    shiftx = random.randint (-shift, shift);
+    shifty = random.randint (-shift, shift);
+    pts2 = np.float32([[
+                0 + random.randint (-a, a) + shiftx,
+                0 + random.randint (-a, a) + shifty
+            ],[
+                w + random.randint (-a, a) + shiftx,
+                0 + random.randint (-a, a) + shifty
+            ],[
+                w + random.randint (-a, a) + shiftx,
+                h + random.randint (-a, a) + shifty
+            ]])
+    M = cv2.getAffineTransform(pts1,pts2)
+
+    image = cv2.warpAffine(
+            cv2.warpAffine (
+                image
+                , Mrot, (w, h)
+            )
+            , M, (w,h)
+        )
+
+    image = cv2.resize(image, (320, 160) ) / 255.0 
+    return image
 
 def process_image_gray(name):
    if 'flip' == name[0:4]:
@@ -284,8 +326,10 @@ def process_image_sully(name):
    return process_image_sully_pixels(image)
  
 def comma_y_func(y):
-   #return y * 180 / scipy.pi
-   return y 
+   return y * 180 / scipy.pi
+   #return y 
+def russia_y_func(y):
+   return y
 def sully_y_func(y):
    # russian - add noise to steering angle
    y= y+ np.random.normal (0, 0.005)
