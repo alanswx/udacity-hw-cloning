@@ -69,8 +69,8 @@ for line in csv_data:
     #xs.append( path+'/'+line[0].decode('UTF-8').strip())
     #ys.append(float(line[3])-steering_camera_offset)
     # more frames of the same?
-    xs.append( path+'/'+line[0].decode('UTF-8').strip())
-    ys.append(float(line[3]))
+    #xs.append( path+'/'+line[0].decode('UTF-8').strip())
+    #ys.append(float(line[3]))
     # add the left image
     #xs.append( path+'/'+line[1].decode('UTF-8').strip())
     #ys.append(float(line[3])+steering_camera_offset)
@@ -302,6 +302,15 @@ def process_image_gray_pixels(image):
 
     image = cv2.resize(image, (320, 160) ) / 255.0 
     return image
+
+def open_image_gray(name):
+   if 'flip' == name[0:4]:
+      name = name[4:]
+      image = cv2.imread(name,cv2.IMREAD_GRAYSCALE)
+      image = cv2.flip(image, 1)
+   else: 
+      image = cv2.imread(name,cv2.IMREAD_GRAYSCALE)
+   return image
 
 def process_image_gray(name):
    if 'flip' == name[0:4]:
