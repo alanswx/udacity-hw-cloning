@@ -10,8 +10,8 @@ import pickle
 #epochs=150
 #epochs=20
 #epochs=5
-#epochs=20
-epochs=12
+epochs=30
+#epochs=12
 def train():
         model = get_model()
         weights_file="./outputs/sully_steering_model/steering_angle.h5"
@@ -24,10 +24,12 @@ def train():
         print ("Total of", len(y) * 4)
         print ("Training..")
         checkpoint_path="weights.{epoch:02d}-{val_loss:.2f}.hdf5"
-        checkpoint = ModelCheckpoint(checkpoint_path, verbose=1, save_best_only=False, save_weights_only=False, mode='auto')
+        checkpoint = ModelCheckpoint(checkpoint_path, verbose=1, save_best_only=True, save_weights_only=False, mode='auto')
+        earlystopping =  EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=1, mode='auto')
+
         #model.fit_generator(driving_data.generate_arrays_from_file(), validation_data = (X, y), samples_per_epoch = len(y) * 4, nb_epoch=epochs, verbose = 1, callbacks=[checkpoint])
         #res=model.fit_generator(driving_data.generate_arrays_from_file(), validation_data = (X, y), samples_per_epoch = len(y) * 4, nb_epoch=epochs, verbose = 1 )
-        res=model.fit_generator(driving_data.generator(driving_data.train_xs,driving_data.train_ys,100), validation_data = (X, y), samples_per_epoch = len(driving_data.train_xs) , nb_epoch=epochs, verbose = 1 )
+        res=model.fit_generator(driving_data.generator(driving_data.train_xs,driving_data.train_ys,100), validation_data = (X, y), samples_per_epoch = len(driving_data.train_xs) , nb_epoch=epochs, verbose = 1  ,callbacks = [ checkpoint ])
 
         if not os.path.exists("./outputs/sully_steering_model"):
             os.makedirs("./outputs/sully_steering_model")

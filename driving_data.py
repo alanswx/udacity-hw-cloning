@@ -9,6 +9,7 @@ ys = []
 train_batch_pointer = 0
 val_batch_pointer = 0
 steering_camera_offset = 0.15
+#steering_camera_offset = 0.25
 
 #read data.txt
 #with open("driving_dataset/data.txt") as f:
@@ -31,15 +32,41 @@ remove = 0
 for line in csv_data:
   #print(line)
   # remove 90% of straight scenes
+  i = i + 1
   if (abs(float(line[3])) < 1e-5):
     remove=remove+1
-    if (remove==10):
+    if (remove==20):
       remove=0
       xs.append( path+'/'+line[0].decode('UTF-8').strip())
       ys.append(float(line[3]))
+      # add the left image
+      xs.append( path+'/'+line[1].decode('UTF-8').strip())
+      ys.append(float(line[3])+steering_camera_offset)
+      # add the right image
+      xs.append( path+'/'+line[0].decode('UTF-8').strip())
+      ys.append(float(line[3])-steering_camera_offset)
   else:
+    if (i % 5) :
+      xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
+      ys.append(float(line[3])*-1)
+
     xs.append( path+'/'+line[0].decode('UTF-8').strip())
     ys.append(float(line[3]))
+    # add the left image
+    xs.append( path+'/'+line[1].decode('UTF-8').strip())
+    ys.append(float(line[3])+steering_camera_offset)
+    # add the right image
+    xs.append( path+'/'+line[0].decode('UTF-8').strip())
+    ys.append(float(line[3])-steering_camera_offset)
+    # more frames of the same?
+    xs.append( path+'/'+line[0].decode('UTF-8').strip())
+    ys.append(float(line[3]))
+    # add the left image
+    #xs.append( path+'/'+line[1].decode('UTF-8').strip())
+    #ys.append(float(line[3])+steering_camera_offset)
+    # add the right image
+    #xs.append( path+'/'+line[0].decode('UTF-8').strip())
+    #ys.append(float(line[3])-steering_camera_offset)
 #  xs.append( path+'/'+line[0].decode('UTF-8').strip())
 #  ys.append(float(line[3]))
 #  xs.append( path+'/'+line[0].decode('UTF-8').strip())
@@ -47,12 +74,6 @@ for line in csv_data:
   # flip
 #  xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
 #  ys.append(float(line[3])*-1)
-  # add the left image
-  xs.append( path+'/'+line[1].decode('UTF-8').strip())
-  ys.append(float(line[3])+steering_camera_offset)
-  # add the right image
-  xs.append( path+'/'+line[0].decode('UTF-8').strip())
-  ys.append(float(line[3])-steering_camera_offset)
   #print(X_full_name)
 
 #get number of images
