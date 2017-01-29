@@ -35,7 +35,7 @@ for line in csv_data:
   i = i + 1
   if (abs(float(line[3])) < 1e-5):
     remove=remove+1
-    if (remove==20):
+    if (remove==10):
       remove=0
       xs.append( path+'/'+line[0].decode('UTF-8').strip())
       ys.append(float(line[3]))
@@ -46,7 +46,8 @@ for line in csv_data:
       xs.append( path+'/'+line[0].decode('UTF-8').strip())
       ys.append(float(line[3])-steering_camera_offset)
   else:
-    if (i % 5) :
+    #if (i % 10) :
+    if (abs(float(line[3])) > 0.11):
       xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
       ys.append(float(line[3])*-1)
 
@@ -85,6 +86,7 @@ random.shuffle(c)
 xs, ys = zip(*c)
 
 train_xs = xs[:int(len(xs) * 0.8)]
+
 train_ys = ys[:int(len(xs) * 0.8)]
 
 val_xs = xs[-int(len(xs) * 0.2):]
@@ -224,6 +226,8 @@ def generator(X_items,y_items,batch_size,x_func=process_image_sully,y_func=sully
     if gen_state > len(X_items):
       bs = batch_size
       gen_state = 0
+      # reshuffle batch
+      
     if gen_state + batch_size > len(X_items):
       bs = len(X_items) - gen_state
       #gen_state=0
