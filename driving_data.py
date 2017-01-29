@@ -49,10 +49,10 @@ for line in csv_data:
       xs.append( path+'/'+line[0].decode('UTF-8').strip())
       ys.append(float(line[3])-steering_camera_offset)
   else:
-    #if (i % 10) :
-    if (abs(float(line[3])) > 0.11):
-      xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
-      ys.append(float(line[3])*-1)
+    if (i % 10) :
+      if (abs(float(line[3])) > 0.11):
+        xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
+        ys.append(float(line[3])*-1)
 
     xs.append( path+'/'+line[0].decode('UTF-8').strip())
     ys.append(float(line[3]))
@@ -63,11 +63,11 @@ for line in csv_data:
     xs.append( path+'/'+line[0].decode('UTF-8').strip())
     ys.append(float(line[3])-steering_camera_offset)
     # add the left image
-    xs.append( path+'/'+line[1].decode('UTF-8').strip())
-    ys.append(float(line[3])+steering_camera_offset)
+    #xs.append( path+'/'+line[1].decode('UTF-8').strip())
+    #ys.append(float(line[3])+steering_camera_offset)
     # add the right image
-    xs.append( path+'/'+line[0].decode('UTF-8').strip())
-    ys.append(float(line[3])-steering_camera_offset)
+    #xs.append( path+'/'+line[0].decode('UTF-8').strip())
+    #ys.append(float(line[3])-steering_camera_offset)
     # more frames of the same?
     xs.append( path+'/'+line[0].decode('UTF-8').strip())
     ys.append(float(line[3]))
