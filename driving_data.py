@@ -43,25 +43,25 @@ for line in csv_data:
       xs.append( path+'/'+line[0].decode('UTF-8').strip())
       ys.append(float(line[3]))
       # add the left image
-      xs.append( path+'/'+line[1].decode('UTF-8').strip())
-      ys.append(float(line[3])+steering_camera_offset)
+      #Axs.append( path+'/'+line[1].decode('UTF-8').strip())
+      #Ays.append(float(line[3])+steering_camera_offset)
       # add the right image
-      xs.append( path+'/'+line[0].decode('UTF-8').strip())
-      ys.append(float(line[3])-steering_camera_offset)
+      #Axs.append( path+'/'+line[0].decode('UTF-8').strip())
+      #Ays.append(float(line[3])-steering_camera_offset)
   else:
-    if (i % 10) :
-      if (abs(float(line[3])) > 0.11):
-        xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
-        ys.append(float(line[3])*-1)
+    #if (i % 10) :
+    #  if (abs(float(line[3])) > 0.11):
+    #    xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
+    #    ys.append(float(line[3])*-1)
 
     xs.append( path+'/'+line[0].decode('UTF-8').strip())
     ys.append(float(line[3]))
     # add the left image
-    xs.append( path+'/'+line[1].decode('UTF-8').strip())
-    ys.append(float(line[3])+steering_camera_offset)
+    #Axs.append( path+'/'+line[1].decode('UTF-8').strip())
+    #Ays.append(float(line[3])+steering_camera_offset)
     # add the right image
-    xs.append( path+'/'+line[0].decode('UTF-8').strip())
-    ys.append(float(line[3])-steering_camera_offset)
+    #Axs.append( path+'/'+line[0].decode('UTF-8').strip())
+    #Ays.append(float(line[3])-steering_camera_offset)
     # add the left image
     #xs.append( path+'/'+line[1].decode('UTF-8').strip())
     #ys.append(float(line[3])+steering_camera_offset)
@@ -252,7 +252,7 @@ def process_image_gray_pixels(image):
     bottom_crop = 135
     mean=0
 
-    pixels = image[top_crop:bottom_crop, :]
+    #pixels = image[top_crop:bottom_crop, :]
 
     (h, w) = image.shape[:2]
     #randomize brightness
@@ -266,7 +266,7 @@ def process_image_gray_pixels(image):
     for i in range (rect_count):
         pt1 = (random.randint (0, w), random.randint (0, h))
         pt2 = (pt1[0] + rect_w, pt1[1] + rect_h)
-        cv2.rectangle(pixels, pt1, pt2, (-0.5, -0.5, -0.5), -1)
+        cv2.rectangle(image, pt1, pt2, (-0.5, -0.5, -0.5), -1)
 
    #pixels=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
     #rotation and scaling
@@ -310,6 +310,7 @@ def open_image_gray(name):
       image = cv2.flip(image, 1)
    else: 
       image = cv2.imread(name,cv2.IMREAD_GRAYSCALE)
+   image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
    return image
 
 def process_image_gray(name):

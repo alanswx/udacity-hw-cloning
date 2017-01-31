@@ -142,7 +142,7 @@ def load_datasets (datasets):
 #datasets with straight steering
 #datasets = ['record-backward', 'record-forward', 'record-backward-2', 'record-forward-2']
 
-if False:
+if True:
   datasets = ['record-backward' ]
 
   steering, center_camera = load_datasets (datasets)
@@ -202,7 +202,7 @@ def load_images (paths):
     return np.array (dataset_images)
 
 #ajs
-#dataset_images = load_images (center_camera)
+dataset_images = load_images (center_camera)
 
 
 #defining augmentation of the dataset
@@ -394,12 +394,12 @@ model.compile (
 #splitting into train and validation dataset
 #dataset_images = driving_data.xs
 #steering = driving_data.ys
-#train, valid = train_test_split ([dataset_images, steering], test_size=0.33)
-#train_dataset_images, train_steering = train
-#valid_dataset_images, valid_steering = valid
+train, valid = train_test_split ([dataset_images, steering], test_size=0.33)
+train_dataset_images, train_steering = train
+valid_dataset_images, valid_steering = valid
 
-train_dataset_images = driving_data.train_xs
-train_steering = driving_data.train_ys
+#train_dataset_images = driving_data.train_xs
+#train_steering = driving_data.train_ys
 #valid_dataset_images =  np.asarray(driving_data.val_xs)
 #valid_steering = np.asarray(driving_data.val_ys)
 X, y = driving_data.get_dataset(driving_data.open_image_gray)
