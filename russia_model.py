@@ -147,6 +147,16 @@ if __name__ == "__main__":
 
  
   print(args.batch)
+  class SaveModel(KerasCallback):
+    def on_epoch_end(self, epoch, logs={}):
+        epoch += 1
+        if (epoch>4):
+            with open ('rmodel-' + str(epoch) + '.json', 'w') as file:
+                file.write (model.to_json ())
+                file.close ()
+
+            model.save_weights ('rmodel-' + str(epoch) + '.h5')
+
   checkpoint_path="weights.{epoch:02d}-{val_loss:.2f}.hdf5"
   checkpoint = ModelCheckpoint(checkpoint_path, verbose=1, save_best_only=False, save_weights_only=False, mode='auto')
   earlyStop =  EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=1, mode='auto')
@@ -157,7 +167,7 @@ if __name__ == "__main__":
     samples_per_epoch=args.epochsize,
     nb_epoch=args.epoch,
     validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch,driving_data.open_image_gray,driving_data.russia_y_func),
-    nb_val_samples=len(driving_data.val_xs), callbacks = [ checkpoint]
+    nb_val_samples=len(driving_data.val_xs), callbacks = [ SaveModel()]
   )
   print("Saving model weights and configuration file.")
 

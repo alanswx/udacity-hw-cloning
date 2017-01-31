@@ -197,7 +197,7 @@ def process_image_sully_pixels(image):
     bottom_crop = 135
     mean=0
 
-    pixels = image[top_crop:bottom_crop, :, :]
+    image= image[top_crop:bottom_crop, :, :]
 
     (h, w) = image.shape[:2]
     #randomize brightness
@@ -211,7 +211,7 @@ def process_image_sully_pixels(image):
     for i in range (rect_count):
         pt1 = (random.randint (0, w), random.randint (0, h))
         pt2 = (pt1[0] + rect_w, pt1[1] + rect_h)
-        cv2.rectangle(pixels, pt1, pt2, (-0.5, -0.5, -0.5), -1)
+        cv2.rectangle(image, pt1, pt2, (-0.5, -0.5, -0.5), -1)
 
    #pixels=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
     #rotation and scaling
@@ -245,7 +245,7 @@ def process_image_sully_pixels(image):
             , M, (w,h)
         )
 
-    return np.float32(cv2.resize(pixels, (200, 66) )) / 255.0 
+    return np.float32(cv2.resize(image, (200, 66) )) / 255.0 
 
 def process_image_gray_pixels(image):
     image = np.copy (image)
@@ -302,7 +302,7 @@ def process_image_gray_pixels(image):
             , M, (w,h)
         )
 
-    image = cv2.resize(image, (320, 160) ) / 255.0 
+    #image = cv2.resize(image, (320, 160) ) / 255.0 
     return image
 
 def open_image_gray(name):
@@ -362,6 +362,32 @@ def generator(X_items,y_items,batch_size,x_func=process_image_sully,y_func=sully
     X =  [x_func(x)  for x in paths]
     gen_state = gen_state + batch_size 
     yield np.asarray(X), np.asarray(y)
+
+def generator_2(images_arr,steering_arr,batch_size,x_func=process_image_sully,y_func=sully_y_func):
+    print("AJS HERE")
+    last_index = len (images_arr) - 1
+    while 1:
+        batch_img = []
+        batch_steering = []
+        for i in range (batch_size):
+
+            idx_img = random.randint (0, last_index)
+            im = x_func(images_arr[idx_img])
+            steering = y_func(steering_arr[idx_img])
+            if (random.uniform (0, 1) > 0.5):
+                im = cv2.flip (im, 1)
+                steering = - steering
+            steering = steering + np.random.normal (0, 0.005)
+
+            #im, steering = augment_record (images_arr [idx_img], steering_arr[idx_img])
+            #im, steering = images_arr [idx_img], steering_arr[idx_img]
+
+            batch_img.append (im)
+            batch_steering.append (steering)
+
+        batch_img = np.asarray (batch_img)
+        batch_steering = np.asarray (batch_steering)
+        yield (batch_img, batch_steering)
 
 
 
