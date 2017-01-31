@@ -248,6 +248,8 @@ def process_image_sully_pixels(image):
     return np.float32(cv2.resize(pixels, (200, 66) )) / 255.0 
 
 def process_image_gray_pixels(image):
+    image = np.copy (image)
+
     top_crop = 55
     bottom_crop = 135
     mean=0
@@ -314,13 +316,8 @@ def open_image_gray(name):
    return image
 
 def process_image_gray(name):
-   if 'flip' == name[0:4]:
-      name = name[4:]
-      image = cv2.imread(name,cv2.IMREAD_GRAYSCALE)
-      image = cv2.flip(image, 1)
-   else: 
-      image = cv2.imread(name,cv2.IMREAD_GRAYSCALE)
    #print(name)
+   image = open_image_gray(name)
    return process_image_gray_pixels(image)
 
 

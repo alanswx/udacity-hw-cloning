@@ -124,7 +124,8 @@ def get_model2(time_len=1):
 
   #learning_rate=0.00075
   #learning_rate=0.001
-  learning_rate=0.0015
+  #learning_rate=0.0015
+  learning_rate=1e-4
   #learning_rate=0.003
   model.compile(optimizer=Adam(lr=learning_rate), loss="mse")
 
@@ -136,9 +137,9 @@ if __name__ == "__main__":
   parser.add_argument('--host', type=str, default="localhost", help='Data server ip address.')
   parser.add_argument('--port', type=int, default=5557, help='Port of server.')
   parser.add_argument('--val_port', type=int, default=5556, help='Port of server for validation dataset.')
-  parser.add_argument('--batch', type=int, default=64, help='Batch size.')
-  parser.add_argument('--epoch', type=int, default=200, help='Number of epochs.')
-  parser.add_argument('--epochsize', type=int, default=10000, help='How many frames per epoch.')
+  parser.add_argument('--batch', type=int, default=112, help='Batch size.')
+  parser.add_argument('--epoch', type=int, default=20, help='Number of epochs.')
+  parser.add_argument('--epochsize', type=int, default=44800, help='How many frames per epoch.')
   parser.add_argument('--skipvalidate', dest='skipvalidate', action='store_true', help='Multiple path output.')
   parser.set_defaults(skipvalidate=False)
   parser.set_defaults(loadweights=False)
@@ -153,9 +154,9 @@ if __name__ == "__main__":
   model = get_model()
   res=model.fit_generator(
     driving_data.generator(driving_data.train_xs,driving_data.train_ys,args.batch,driving_data.process_image_gray,driving_data.russia_y_func),
-    samples_per_epoch=len(driving_data.train_xs)*3,
+    samples_per_epoch=args.epochsize,
     nb_epoch=args.epoch,
-    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch,driving_data.process_image_gray,driving_data.russia_y_func),
+    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch,driving_data.open_image_gray,driving_data.russia_y_func),
     nb_val_samples=len(driving_data.val_xs), callbacks = [ checkpoint]
   )
   print("Saving model weights and configuration file.")
