@@ -7,11 +7,13 @@ import argparse
 import json
 import pickle
 from keras.callbacks import EarlyStopping
+from keras.callbacks import Callback 
 from keras.models import Sequential
 from keras.optimizers import Adam
-from keras.layers import Dense, Dropout, Flatten, Lambda, ELU
+from keras.layers import Dense, Dropout, Flatten, Lambda, ELU, Activation
 from keras.layers.convolutional import Convolution2D
 from sklearn.model_selection import train_test_split
+
 import cv2
 
 import driving_data
@@ -23,97 +25,6 @@ import driving_data
 import numpy as np
 from PIL import Image, ImageEnhance, ImageOps
 import scipy.misc
-
-'''
-steering_camera_offset = 0.15
-
-
-path = '/data1/udacity/simulator/data'
-img_path = path +'/IMG'
-csv_file = path +'/driving_log.csv'
-
-# open the CSV file and loop through each line
-# load the CSV so we can have labels
-csv_data=np.recfromcsv(csv_file, delimiter=',', filling_values=np.nan, case_sensitive=True, deletechars='', replace_space=' ')
-print(csv_data.shape)
-#print(csv_data)
-
-# center, left, right, steering angle, throttle, break, speed
-
-# preprocess the data
-
-X_full_name = []
-y_full_angle= []
-
-for line in csv_data:
-  #print(line)
-  X_full_name.append( path+'/'+line[0].decode('UTF-8').strip())
-  y_full_angle.append(float(line[3]))
-  # flip
-  #X_full_name.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
-  #y_full_angle.append(float(line[3])*-1)
-  # add the left image
-  X_full_name.append( path+'/'+line[1].decode('UTF-8').strip())
-  y_full_angle.append(float(line[3])+steering_camera_offset)
-  # add the right image
-  X_full_name.append( path+'/'+line[0].decode('UTF-8').strip())
-  y_full_angle.append(float(line[3])-steering_camera_offset)
-  #print(X_full_name)
- 
-
-#
-#  shuffle the data and split it into a validation set
-# 
-
-#X_train, X_validation, y_train, y_validation = train_test_split(X_full_name, y_full_angle, test_size=0.20, random_state=42)
-X_train, X_validation, y_train, y_validation = train_test_split(X_full_name, y_full_angle, test_size=0.01, random_state=42)
-
-
-print(len(X_full_name)) 
-
-
-def process_image(name):
-   top_crop = 55
-   bottom_crop = 135
-   mean=0
-   if 'flip' == name[0:4]:
-      name = name[4:]
-      image = cv2.imread(name)
-      image = cv2.flip(image, 1)
-   else: 
-      image = cv2.imread(name)
-
-   image = image[top_crop:bottom_crop, :, :]
-   image=cv2.copyMakeBorder(image, top=top_crop, bottom=(160-bottom_crop) , left=0, right=0, borderType= cv2.BORDER_CONSTANT, value=[mean,mean,mean] )
-
-   return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)[0]
- 
-
-def generator(X_items,y_items,batch_size):
-  #print("inside generator")
-  gen_state = 0
-  bs = batch_size
-  while 1:
-    if gen_state > len(X_items):
-      bs = batch_size
-      gen_state = 0
-    if gen_state + batch_size > len(X_items):
-      bs = len(X_items) - gen_state
-      #gen_state=0
-    paths = X_items[gen_state : gen_state + bs]
-    yb = y_items[gen_state : gen_state + bs]
-    #y = [ (y1 * 2 ) for y1 in  yb]
-    y = [ (y1 * 180 / scipy.pi) for y1 in  yb]
-    X =  [process_image(x)  for x in paths]
-    #X =  [np.float32((cv2.imread(x, 1)[None, :, :, :].transpose(0, 3, 1, 2) )) / 255.0 for x in paths]
-    gen_state = gen_state + batch_size 
-    #print(len(X))
-    #print(X[0][0].shape)
-    #print(np.asarray(X).shape)
-    #print(np.asarray(X[0]).shape)
-    yield np.asarray(X), np.asarray(y)
-'''
-
 def get_model(time_len=1):
   ch, row, col = 3, 160, 320  # camera format
   #ch, row, col = 3, 80, 160  # camera format
@@ -133,13 +44,18 @@ def get_model(time_len=1):
   model.add(Dense(512))
   model.add(Dropout(.5))
   model.add(ELU())
+  model.add(Dense(256))
+  model.add(Activation ('tanh'))
   model.add(Dense(1))
+
+
 
   #model.load_weights("./outputs/steering_model/steering_angle.keras" )
 
   #learning_rate=0.00075
   #learning_rate=0.001
-  learning_rate=0.0015
+  #learning_rate=0.0015
+  learning_rate=1e-4
   #learning_rate=0.003
   model.compile(optimizer=Adam(lr=learning_rate), loss="mse")
 
@@ -163,12 +79,24 @@ if __name__ == "__main__":
   print(args.batch)
 
   model = get_model()
+  class SaveModel(Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        epoch += 1
+        if (epoch>4):
+            with open ('cmodel-' + str(epoch) + '.json', 'w') as file:
+                file.write (model.to_json ())
+                file.close ()
+
+            model.save_weights ('cmodel-' + str(epoch) + '.h5')
+
+  earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=1, mode='auto')
+
   res=model.fit_generator(
     driving_data.generator(driving_data.train_xs,driving_data.train_ys,args.batch,driving_data.process_image_comma,driving_data.comma_y_func),
-    samples_per_epoch=len(driving_data.train_xs),
+    samples_per_epoch=len(driving_data.train_xs)*12,
     nb_epoch=args.epoch,
-    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch,driving_data.process_image_comma,driving_data.comma_y_func),
-    nb_val_samples=len(driving_data.val_xs), callbacks = [ EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=1, mode='auto')]
+    validation_data=driving_data.generator(driving_data.val_xs,driving_data.val_ys,args.batch,driving_data.process_image_comma_noaugment,driving_data.comma_y_func),
+    nb_val_samples=len(driving_data.val_xs), callbacks = [ SaveModel() ]
   )
   print("Saving model weights and configuration file.")
 

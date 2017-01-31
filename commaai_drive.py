@@ -42,10 +42,10 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
-    print(image_array.shape)
+    #print(image_array.shape)
 
     transformed_image_array=driving_data.process_image_comma_pixels(image_array)
-    print(transformed_image_array.shape)
+    #print(transformed_image_array.shape)
     ''' 
     image_array = image_array[55:135, :, :]
     mean=0
@@ -59,13 +59,13 @@ def telemetry(sid, data):
     '''    
     #transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
-    print("about to call predict")
+    #print("about to call predict")
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
-    print("after predict")
-    steering_angle =  steering_angle * scipy.pi / 180 
+    #print("after predict")
+    #steering_angle =  steering_angle * scipy.pi / 180 
     #steering_angle =  steering_angle * scipy.pi / 180 
    # steering_angle =  steering_angle / 2
-    print("steering angle"+str(steering_angle))
+    #print("steering angle"+str(steering_angle))
     # The driving model currently just outputs a constant throttle. Feel free to edit this.
     speed = float(speed)
   # TODO - change this
@@ -79,7 +79,7 @@ def telemetry(sid, data):
         throttle = 0.15
 
     #throttle = 0.2
-    print(steering_angle, throttle)
+    #print(steering_angle, throttle)
     send_control(steering_angle, throttle)
 
 
@@ -105,16 +105,17 @@ if __name__ == '__main__':
         # NOTE: if you saved the file by calling json.dump(model.to_json(), ...)
         # then you will have to call:
         #
-        model = model_from_json(json.loads(jfile.read()))
-        model.summary()
+        #model = model_from_json(json.loads(jfile.read()))
+        #model.summary()
         #
         # instead.
-        #model = model_from_json(jfile.read())
+        model = model_from_json(jfile.read())
+        model.summary()
 
 
     learning_rate=0.0001
     model.compile(Adam(lr=learning_rate), "mse")
-    weights_file = args.model.replace('json', 'keras')
+    weights_file = args.model.replace('json', 'h5')
     model.load_weights(weights_file)
 
     # wrap Flask application with engineio's middleware
