@@ -162,6 +162,7 @@ if __name__ == "__main__":
   earlyStop =  EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=1, mode='auto')
 
   model = get_model()
+  model.summary()
   res=model.fit_generator(
     driving_data.generator(driving_data.train_xs,driving_data.train_ys,args.batch,driving_data.process_image_gray,driving_data.russia_y_func),
     samples_per_epoch=args.epochsize,

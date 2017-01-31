@@ -30,6 +30,11 @@ csv_file = path +'/driving_log.csv'
 # open the CSV file and loop through each line
 # load the CSV so we can have labels
 csv_data=np.recfromcsv(csv_file, delimiter=',', filling_values=np.nan, case_sensitive=True, deletechars='', replace_space=' ')
+
+
+leftright = True
+flip = False
+
 i  = 0
 remove = 0
 for line in csv_data:
@@ -42,12 +47,13 @@ for line in csv_data:
       remove=0
       xs.append( path+'/'+line[0].decode('UTF-8').strip())
       ys.append(float(line[3]))
-      # add the left image
-      #Axs.append( path+'/'+line[1].decode('UTF-8').strip())
-      #Ays.append(float(line[3])+steering_camera_offset)
-      # add the right image
-      #Axs.append( path+'/'+line[0].decode('UTF-8').strip())
-      #Ays.append(float(line[3])-steering_camera_offset)
+      if leftright:
+          # add the left image
+          xs.append( path+'/'+line[1].decode('UTF-8').strip())
+          ys.append(float(line[3])+steering_camera_offset)
+          # add the right image
+          xs.append( path+'/'+line[0].decode('UTF-8').strip())
+          ys.append(float(line[3])-steering_camera_offset)
   else:
     #if (i % 10) :
     #  if (abs(float(line[3])) > 0.11):
@@ -56,12 +62,16 @@ for line in csv_data:
 
     xs.append( path+'/'+line[0].decode('UTF-8').strip())
     ys.append(float(line[3]))
-    # add the left image
-    #Axs.append( path+'/'+line[1].decode('UTF-8').strip())
-    #Ays.append(float(line[3])+steering_camera_offset)
-    # add the right image
-    #Axs.append( path+'/'+line[0].decode('UTF-8').strip())
-    #Ays.append(float(line[3])-steering_camera_offset)
+    if flip:
+        xs.append( "flip"+path+'/'+line[0].decode('UTF-8').strip())
+        ys.append(float(line[3])*-1)
+    if leftright:
+        # add the left image
+        xs.append( path+'/'+line[1].decode('UTF-8').strip())
+        ys.append(float(line[3])+steering_camera_offset)
+        # add the right image
+        xs.append( path+'/'+line[0].decode('UTF-8').strip())
+        ys.append(float(line[3])-steering_camera_offset)
     # add the left image
     #xs.append( path+'/'+line[1].decode('UTF-8').strip())
     #ys.append(float(line[3])+steering_camera_offset)
