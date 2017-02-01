@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Convolution2D, ZeroPadding2D, MaxPooling2D
+from keras.layers import Convolution2D, ZeroPadding2D, MaxPooling2D,ELU
 from keras.layers.core import Flatten, Dense, Dropout, Lambda
 from keras import backend as K
 from keras.optimizers import SGD
@@ -72,9 +72,41 @@ def vision_2D(dropout_frac=.2):
     return model
 
 
+def nvidia_net():
+    model = Sequential()
+    #lambda?
+    p=0.33
+    model.add(Convolution2D(24, 5, 5, init = 'he_normal', subsample= (2, 2), name='conv1_1', border_mode='valid',input_shape=(66, 200, 3)))
+    model.add(ELU())
+    model.add(Convolution2D(36, 5, 5, init = 'he_normal', subsample= (2, 2), border_mode='valid',name='conv2_1'))
+    model.add(ELU())
+    model.add(Convolution2D(48, 5, 5, init = 'he_normal', subsample= (2, 2), border_mode='valid',name='conv3_1'))
+    model.add(ELU())
+    model.add(Convolution2D(64, 3, 3, init = 'he_normal', subsample= (1, 1), border_mode='valid',name='conv4_1'))
+    model.add(ELU())
+    model.add(Convolution2D(64, 3, 3, init = 'he_normal', subsample= (1, 1), border_mode='valid',name='conv4_2'))
+    model.add(ELU())
+    model.add(Flatten())
+    model.add(Dense(1164, init = 'he_normal', name = "dense_0"))
+    model.add(ELU())
+    model.add(Dropout(p))
+    model.add(Dense(100, init = 'he_normal',  name = "dense_1"))
+    model.add(ELU())
+    model.add(Dropout(p))
+    model.add(Dense(50, init = 'he_normal', name = "dense_2"))
+    model.add(ELU())
+    model.add(Dropout(p))
+    model.add(Dense(10, init = 'he_normal', name = "dense_3"))
+    model.add(ELU())
+    model.add(Dense(1, init = 'he_normal', name = "dense_4"))
+
+    return model
+    
 
 def steering_net():
+    #p=0.50
     p=0.33
+    #p=0.25
     model = Sequential()
     model.add(Convolution2D(24, 5, 5, init = normal_init, subsample= (2, 2), name='conv1_1', input_shape=(66, 200, 3)))
     model.add(Activation('relu'))
@@ -105,11 +137,13 @@ def steering_net():
 
 def get_model():
     model = steering_net()
+    #model = nvidia_net()
     model.compile(loss = 'mse', optimizer = 'Adam')
     return model
 
 def load_model(path):
     model = steering_net()
+    #model = nvidia_net()
     #model = vision_2D()
     model.load_weights(path)
     model.compile(loss = 'mse', optimizer = 'Adam')

@@ -7,12 +7,24 @@ import argparse
 import driving_data
 import pickle
 
+
+
 #epochs=150
 #epochs=20
 #epochs=5
 epochs=20
 #epochs=12
 def train():
+        class SaveModel(Callback):
+           def on_epoch_end(self, epoch, logs={}):
+             epoch += 1
+             if (epoch>0):
+                 with open ('smodel-' + str(epoch) + '.json', 'w') as file:
+                     file.write (model.to_json ())
+                     file.close ()
+
+                 model.save_weights ('smodel-' + str(epoch) + '.h5')
+
         #model = vision_2D()
         model = get_model()
         weights_file="./outputs/sully_steering_model/steering_angle.h5"
@@ -30,7 +42,7 @@ def train():
 
         #model.fit_generator(driving_data.generate_arrays_from_file(), validation_data = (X, y), samples_per_epoch = len(y) * 4, nb_epoch=epochs, verbose = 1, callbacks=[checkpoint])
         #res=model.fit_generator(driving_data.generate_arrays_from_file(), validation_data = (X, y), samples_per_epoch = len(y) * 4, nb_epoch=epochs, verbose = 1 )
-        res=model.fit_generator(driving_data.generator(driving_data.train_xs,driving_data.train_ys,112), validation_data = (X, y), samples_per_epoch = 100*112 , nb_epoch=epochs, verbose = 1  ,callbacks = [ checkpoint ])
+        res=model.fit_generator(driving_data.generator(driving_data.train_xs,driving_data.train_ys,256), validation_data = (X, y), samples_per_epoch = 100*256, nb_epoch=epochs, verbose = 1  ,callbacks = [ SaveModel()])
 
         if not os.path.exists("./outputs/sully_steering_model"):
             os.makedirs("./outputs/sully_steering_model")
