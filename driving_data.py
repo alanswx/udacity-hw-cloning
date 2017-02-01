@@ -32,7 +32,7 @@ csv_file = path +'/driving_log.csv'
 csv_data=np.recfromcsv(csv_file, delimiter=',', filling_values=np.nan, case_sensitive=True, deletechars='', replace_space=' ')
 
 
-leftright = True
+leftright = False
 flip = False
 
 i  = 0
@@ -278,7 +278,7 @@ def process_image_sully_pixels(image):
     bottom_crop = 135
     mean=0
 
-    image= image[top_crop:bottom_crop, :, :]
+    #image= image[top_crop:bottom_crop, :, :]
 
     (h, w) = image.shape[:2]
     #randomize brightness
@@ -328,7 +328,7 @@ def process_image_sully_pixels(image):
 
     #return np.float32(cv2.resize(image, (200, 66) )) / 255.0 
     image = np.float32(cv2.resize(image, (200, 66) )) 
-    image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
+    #image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
     return image
 
 def process_image_gray_pixels(image):
@@ -412,6 +412,7 @@ def open_image_sully(name):
       image = cv2.flip(image, 1)
    else: 
       image = cv2.imread(name)
+   image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
    return image
 
 def process_image_sully(name):
@@ -429,7 +430,7 @@ def sully_y_func(y):
    y= y+ np.random.normal (0, 0.005)
    return y 
    
-def generator(X_items,y_items,batch_size,x_func=process_image_sully,y_func=sully_y_func):
+def generator_old(X_items,y_items,batch_size,x_func=process_image_sully,y_func=sully_y_func):
   #print("inside generator")
   gen_state = 0
   bs = batch_size
@@ -450,7 +451,7 @@ def generator(X_items,y_items,batch_size,x_func=process_image_sully,y_func=sully
     gen_state = gen_state + batch_size 
     yield np.asarray(X), np.asarray(y)
 
-def generator_2(images_arr,steering_arr,batch_size,x_func=process_image_sully,y_func=sully_y_func):
+def generator(images_arr,steering_arr,batch_size,x_func=process_image_sully,y_func=sully_y_func):
     print("AJS HERE")
     last_index = len (images_arr) - 1
     while 1:

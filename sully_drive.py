@@ -42,10 +42,15 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
-    print(image_array.shape)
-    transformed_image_array  =  np.array([driving_data.process_image_sully_pixels(image_array)])
+    #print(image_array.shape)
+    #transformed_image_array  =  np.array([driving_data.process_image_sully_pixels(image_array)])
+    #print(transformed_image_array.shape)
     #transformed_image_array  =  np.array([np.float32(cv2.resize(image_array, (200, 66) )) / 255.0 ])
-    print(transformed_image_array.shape)
+    
+    transformed_image_array = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
+    transformed_image_array = np.array([np.float32(cv2.resize(transformed_image_array, (200, 66) ))])
+
+    #print(transformed_image_array.shape)
     
     #b = image_array[None, :, :, :].transpose(0, 3, 1, 2)
     #print(b.shape)
@@ -53,12 +58,12 @@ def telemetry(sid, data):
    # transformed_image_array = b
     #transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
-    print("about to call predict")
+    #print("about to call predict")
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
-    print("steering angle"+str(steering_angle))
+    #print("steering angle"+str(steering_angle))
     # The driving model currently just outputs a constant throttle. Feel free to edit this.
     throttle = 0.2
-    print(steering_angle, throttle)
+    #print(steering_angle, throttle)
     send_control(steering_angle, throttle)
 
 

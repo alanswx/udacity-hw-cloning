@@ -19,6 +19,14 @@ from keras.layers.pooling import MaxPooling2D, AveragePooling1D
 from keras.optimizers import Adam, SGD
 from keras.utils.np_utils import to_categorical
 from keras.callbacks import Callback as KerasCallback
+from keras.layers import Input, LSTM, Dense, merge
+from keras.models import Model
+from keras.models import Sequential
+from keras.layers import Convolution2D, MaxPooling2D, SimpleRNN, Reshape, BatchNormalization
+from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.regularizers import l2
+
+
 
 from sklearn.model_selection import train_test_split
 import cv2
@@ -97,6 +105,47 @@ def get_model():
 
   return model
 
+def vision_2D(dropout_frac=.2):
+    '''
+    Network with 4 convolutions, 2 residual shortcuts to predict angle.
+    '''
+    img_in = Input(shape=(160, 320), name='img_in')
+    #img_in = Reshape ((160, 320, 1), input_shape=(160, 320), name='img_in')
+
+    net =  Convolution2D(64, 6, 6, subsample=(4,4), name='conv0',input_shape=(160,320))(img_in)
+    net =  Dropout(dropout_frac)(net)
+
+    net =  Convolution2D(64, 3, 3, subsample=(2,2), name='conv1')(net)
+    net =  Dropout(dropout_frac)(net)
+
+    #Create residual to shortcut
+    aux1 = Flatten(name='aux1_flat')(net)
+    aux1 = Dense(64, name='aux1_dense')(aux1)
+
+    net =  Convolution2D(128, 3, 3, subsample=(2,2), border_mode='same', name='conv2')(net)
+    net =  Dropout(dropout_frac)(net)
+
+    net =  Convolution2D(128, 3, 3, subsample=(2,2), border_mode='same', name='conv3')(net)
+    net =  Dropout(dropout_frac)(net)
+
+    aux2 = Flatten(name='aux2_flat')(net)
+    aux2 = Dense(64, name='aux2_dense')(aux2)
+
+    net = Flatten(name='net_flat')(net)
+    net = Dense(512, activation='relu', name='net_dense1')(net)
+    net =  Dropout(dropout_frac)(net)
+    net = Dense(256, activation='relu', name='net_dense2')(net)
+    net =  Dropout(dropout_frac)(net)
+    net = Dense(128, activation='relu', name='net_dense3')(net)
+    net =  Dropout(dropout_frac)(net)
+    net = Dense(64, activation='linear', name='net_dense4')(net)
+
+    net = merge([net, aux1, aux2], mode='sum') #combine residual layers
+    angle_out = Dense(1, name='angle_out')(net)
+    model = Model(input=[img_in], output=[angle_out])
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    return model
+
 
 
 def get_model2(time_len=1):
@@ -104,9 +153,10 @@ def get_model2(time_len=1):
   #ch, row, col = 3, 80, 160  # camera format
 
   model = Sequential()
-  model.add(Lambda(lambda x: x/127.5 - 1.,
-            input_shape=(ch, row, col),
-            output_shape=(ch, row, col)))
+  model.add (Reshape ((160, 320, 1), input_shape=(160, 320)))
+  #model.add(Lambda(lambda x: x/127.5 - 1.,
+  #          input_shape=(ch, row, col),
+  #          output_shape=(ch, row, col)))
   model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
   model.add(ELU())
   model.add(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
@@ -117,7 +167,9 @@ def get_model2(time_len=1):
   model.add(ELU())
   model.add(Dense(512))
   model.add(Dropout(.5))
-  model.add(ELU())
+  model.add(Activation('relu'))
+  model.add(Dense(32))
+  model.add(Activation('tanh'))
   model.add(Dense(1))
 
   #model.load_weights("./outputs/russia_steering_model/steering_angle.keras" )
