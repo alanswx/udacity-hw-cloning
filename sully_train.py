@@ -30,7 +30,7 @@ def train():
 
         #model.fit_generator(driving_data.generate_arrays_from_file(), validation_data = (X, y), samples_per_epoch = len(y) * 4, nb_epoch=epochs, verbose = 1, callbacks=[checkpoint])
         #res=model.fit_generator(driving_data.generate_arrays_from_file(), validation_data = (X, y), samples_per_epoch = len(y) * 4, nb_epoch=epochs, verbose = 1 )
-        res=model.fit_generator(driving_data.generator(driving_data.train_xs,driving_data.train_ys,100), validation_data = (X, y), samples_per_epoch = (len(driving_data.train_xs)*12) , nb_epoch=epochs, verbose = 1  ,callbacks = [ checkpoint ])
+        res=model.fit_generator(driving_data.generator(driving_data.train_xs,driving_data.train_ys,112), validation_data = (X, y), samples_per_epoch = 400*112 , nb_epoch=epochs, verbose = 1  ,callbacks = [ checkpoint ])
 
         if not os.path.exists("./outputs/sully_steering_model"):
             os.makedirs("./outputs/sully_steering_model")

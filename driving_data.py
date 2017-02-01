@@ -11,8 +11,10 @@ ys = []
 #points to the end of the last batch
 train_batch_pointer = 0
 val_batch_pointer = 0
-steering_camera_offset = 0.15
-#steering_camera_offset = 0.25
+#steering_camera_offset = 0.15
+#steering_camera_offset = 0.27
+#steering_camera_offset = 0.10
+steering_camera_offset = 0.08
 
 #read data.txt
 #with open("driving_dataset/data.txt") as f:
@@ -32,7 +34,7 @@ csv_file = path +'/driving_log.csv'
 csv_data=np.recfromcsv(csv_file, delimiter=',', filling_values=np.nan, case_sensitive=True, deletechars='', replace_space=' ')
 
 
-leftright = False
+leftright = True
 flip = False
 
 i  = 0
@@ -194,6 +196,7 @@ def process_image_comma_pixels2(image):
     return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)
 
 def process_image_comma_pixels(image):
+    image = np.copy (image)
     top_crop = 55
     bottom_crop = 135
     mean=0
@@ -274,6 +277,7 @@ def process_image_comma_noaugment(name):
 
 
 def process_image_sully_pixels(image):
+    image = np.copy (image)
     top_crop = 55
     bottom_crop = 135
     mean=0

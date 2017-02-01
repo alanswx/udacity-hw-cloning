@@ -44,7 +44,9 @@ def telemetry(sid, data):
     image_array = np.asarray(image)
     #print(image_array.shape)
 
-    transformed_image_array=driving_data.process_image_comma_pixels(image_array)
+    #transformed_image_array=driving_data.process_image_comma_pixels(image_array)
+    b = image_array[None, :, :, :].transpose(0, 3, 1, 2)
+    transformed_image_array = b
     #print(transformed_image_array.shape)
     ''' 
     image_array = image_array[55:135, :, :]
