@@ -3,6 +3,10 @@ import random
 import cv2
 import numpy as np
 from sklearn.utils import shuffle
+#from keras.preprocessing.image import img_to_array, load_img
+from PIL import Image, ImageEnhance, ImageOps
+
+
 
 
 xs = []
@@ -11,10 +15,10 @@ ys = []
 #points to the end of the last batch
 train_batch_pointer = 0
 val_batch_pointer = 0
-#steering_camera_offset = 0.15
+steering_camera_offset = 0.15
 #steering_camera_offset = 0.27
 #steering_camera_offset = 0.10
-steering_camera_offset = 0.08
+#steering_camera_offset = 0.08
 
 #read data.txt
 #with open("driving_dataset/data.txt") as f:
@@ -116,6 +120,27 @@ val_ys = ys[-int(len(xs) * 0.2):]
 num_train_images = len(train_xs)
 num_val_images = len(val_xs)
 
+def augment_brightness_camera_images(image):
+    '''
+    :param image: Input image
+    :return: output image with reduced brightness
+    '''
+
+    # convert to HSV so that its easy to adjust brightness
+    image1 = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
+    #image1 = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+
+    # randomly generate the brightness reduction factor
+    # Add a constant so that it prevents the image from being completely dark
+    random_bright = .25+np.random.uniform()
+
+    # Apply the brightness reduction to the V channel
+    image1[:,:,2] = image1[:,:,2]*random_bright
+
+    # convert to RBG again
+    image1 = cv2.cvtColor(image1,cv2.COLOR_HSV2RGB)
+    return image1
+
 
 def get_dataset(func):
     images= [func(x) for x in train_xs]
@@ -146,8 +171,8 @@ def process_image_comma_pixels2(image):
     #return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)
     (h, w) = image.shape[:2]
     #randomize brightness
-    brightness = random.uniform (-0.3, 0.3)
-    image = np.add(image, brightness)
+    #brightness = random.uniform (-0.3, 0.3)
+    #image = np.add(image, brightness)
 
     # black squares from Russian demo
     rect_w = 25
@@ -207,8 +232,9 @@ def process_image_comma_pixels(image):
     #return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)
     (h, w) = image.shape[:2]
     #randomize brightness
-    brightness = random.uniform (-0.3, 0.3)
-    image = np.add(image, brightness)
+    #brightness = random.uniform (-0.3, 0.3)
+    image = augment_brightness_camera_images(image)
+    #image = np.add(image, brightness)
 
     # black squares from Russian demo
     rect_w = 25
@@ -262,7 +288,8 @@ def process_image_comma(name):
       image = cv2.imread(name)
       image = cv2.flip(image, 1)
    else: 
-      image = cv2.imread(name)
+      #image = cv2.imread(name)
+      image = np.array(Image.open(name))
    return process_image_comma_pixels(image)[0]
 
 def process_image_comma_noaugment(name):
@@ -286,8 +313,9 @@ def process_image_sully_pixels(image):
 
     (h, w) = image.shape[:2]
     #randomize brightness
-    brightness = random.uniform (-0.3, 0.3)
-    image = np.add(image, brightness)
+    #brightness = random.uniform (-0.3, 0.3)
+    #image = np.add(image, brightness)
+    image = augment_brightness_camera_images(image)
 
     # black squares from Russian demo
     rect_w = 25
@@ -331,8 +359,9 @@ def process_image_sully_pixels(image):
         )
 
     #return np.float32(cv2.resize(image, (200, 66) )) / 255.0 
-    image = np.float32(cv2.resize(image, (200, 66) )) 
+    image = cv2.resize(image, (200, 66) )
     #image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
+    image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
     return image
 
 def process_image_gray_pixels(image):
@@ -415,8 +444,10 @@ def open_image_sully(name):
       image = cv2.imread(name)
       image = cv2.flip(image, 1)
    else: 
-      image = cv2.imread(name)
-   image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
+      #image = cv2.imread(name)
+      #image = load_img(name)
+      #image = img_to_array(image)
+      image = np.array(Image.open(name))
    return image
 
 def process_image_sully(name):

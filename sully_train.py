@@ -27,6 +27,8 @@ def train():
 
         #model = vision_2D()
         model = get_model()
+        from keras.utils.visualize_util import plot
+        plot(model, to_file='model.png',show_shapes=True)
         weights_file="./outputs/sully_steering_model/steering_angle.h5"
         #model = load_model(weights_file)
 

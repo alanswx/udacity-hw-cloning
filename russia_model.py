@@ -25,6 +25,20 @@ from keras.models import Sequential
 from keras.layers import Convolution2D, MaxPooling2D, SimpleRNN, Reshape, BatchNormalization
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras.regularizers import l2
+from keras.models import Sequential
+from keras.layers import Convolution2D, ZeroPadding2D, MaxPooling2D,ELU
+from keras.layers.core import Flatten, Dense, Dropout, Lambda
+from keras import backend as K
+from keras.optimizers import SGD
+from keras.layers import Dense, Dropout, Activation, Flatten
+import tensorflow as tf
+from keras.layers import Input, LSTM, Dense, merge
+from keras.models import Model
+from keras.models import Sequential
+from keras.layers import Convolution2D, MaxPooling2D, SimpleRNN, Reshape, BatchNormalization
+from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.regularizers import l2
+
 
 
 
@@ -40,6 +54,73 @@ import driving_data
 import numpy as np
 from PIL import Image, ImageEnhance, ImageOps
 import scipy.misc
+
+def nvidia_net():
+    model = Sequential()
+    #lambda?
+    p=0.33
+    model.add(Reshape ((160, 320, 1), input_shape=(160, 320)))
+    model.add(Convolution2D(24, 5, 5, init = 'he_normal', subsample= (2, 2), name='conv1_1', border_mode='valid',input_shape=(160, 320, 1)))
+    model.add(ELU())
+    model.add(Convolution2D(36, 5, 5, init = 'he_normal', subsample= (2, 2), border_mode='valid',name='conv2_1'))
+    model.add(ELU())
+    model.add(Convolution2D(48, 5, 5, init = 'he_normal', subsample= (2, 2), border_mode='valid',name='conv3_1'))
+    model.add(ELU())
+    model.add(Convolution2D(64, 3, 3, init = 'he_normal', subsample= (1, 1), border_mode='valid',name='conv4_1'))
+    model.add(ELU())
+    model.add(Convolution2D(64, 3, 3, init = 'he_normal', subsample= (1, 1), border_mode='valid',name='conv4_2'))
+    model.add(ELU())
+    model.add(Flatten())
+    model.add(Dense(1164, init = 'he_normal', name = "dense_0"))
+    model.add(ELU())
+    model.add(Dropout(p))
+    model.add(Dense(100, init = 'he_normal',  name = "dense_1"))
+    model.add(ELU())
+    model.add(Dropout(p))
+    model.add(Dense(50, init = 'he_normal', name = "dense_2"))
+    model.add(ELU())
+    model.add(Dropout(p))
+    model.add(Dense(10, init = 'he_normal', name = "dense_3"))
+    model.add(ELU())
+    model.add(Dense(1, init = 'he_normal', name = "dense_4"))
+    model.compile(loss = 'mse', optimizer = 'Adam')
+
+    return model
+    
+
+def steering_net():
+    #p=0.50
+    p=0.33
+    #p=0.25
+    model = Sequential()
+    model.add(Convolution2D(24, 5, 5, init = normal_init, subsample= (2, 2), name='conv1_1', input_shape=(66, 200, 3)))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(36, 5, 5, init = normal_init, subsample= (2, 2), name='conv2_1'))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(48, 5, 5, init = normal_init, subsample= (2, 2), name='conv3_1'))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(64, 3, 3, init = normal_init, subsample= (1, 1), name='conv4_1'))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(64, 3, 3, init = normal_init, subsample= (1, 1), name='conv4_2'))
+    model.add(Activation('relu'))
+    model.add(Flatten())
+    model.add(Dense(1164, init = normal_init, name = "dense_0"))
+    model.add(Activation('relu'))
+    model.add(Dropout(p))
+    model.add(Dense(100, init = normal_init,  name = "dense_1"))
+    model.add(Activation('relu'))
+    model.add(Dropout(p))
+    model.add(Dense(50, init = normal_init, name = "dense_2"))
+    model.add(Activation('relu'))
+    model.add(Dropout(p))
+    model.add(Dense(10, init = normal_init, name = "dense_3"))
+    model.add(Activation('relu'))
+    model.add(Dense(1, init = normal_init, name = "dense_4"))
+    model.add(Lambda(atan_layer, output_shape = atan_layer_shape, name = "atan_0"))
+    model.compile(loss = 'mse', optimizer = 'Adam')
+
+    return model
+
 
 def get_model():
   model = Sequential ([
@@ -214,6 +295,7 @@ if __name__ == "__main__":
   earlyStop =  EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=1, mode='auto')
 
   model = get_model()
+  #model = nvidia_net()
   model.summary()
   res=model.fit_generator(
     driving_data.generator(driving_data.train_xs,driving_data.train_ys,args.batch,driving_data.process_image_gray,driving_data.russia_y_func),
