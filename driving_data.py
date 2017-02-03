@@ -456,8 +456,8 @@ def process_image_sully(name):
    return process_image_sully_pixels(image)
  
 def comma_y_func(y):
-   #return y * 180 / scipy.pi
-   return y 
+   return y * 180 / scipy.pi
+   #return y 
 def russia_y_func(y):
    return y
 def sully_y_func(y):

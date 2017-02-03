@@ -64,7 +64,7 @@ def telemetry(sid, data):
     #print("about to call predict")
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
     #print("after predict")
-    #steering_angle =  steering_angle * scipy.pi / 180 
+    steering_angle =  steering_angle * scipy.pi / 180 
     #steering_angle =  steering_angle * scipy.pi / 180 
    # steering_angle =  steering_angle / 2
     #print("steering angle"+str(steering_angle))

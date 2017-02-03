@@ -9,10 +9,10 @@ import pickle
 
 
 
-#epochs=150
+epochs=150
 #epochs=20
 #epochs=5
-epochs=20
+#epochs=20
 #epochs=12
 def train():
         class SaveModel(Callback):
