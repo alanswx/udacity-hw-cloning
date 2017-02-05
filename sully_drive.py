@@ -42,6 +42,7 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
+    #image_array = driving_data.cropImage(image_array)
     #print(image_array.shape)
     #transformed_image_array  =  np.array([driving_data.process_image_sully_pixels(image_array)])
     #print(transformed_image_array.shape)
@@ -86,20 +87,20 @@ if __name__ == '__main__':
     help='Path to model definition json. Model weights should be on the same path.')
     args = parser.parse_args()
     weights_file = args.model.replace('json', 'h5')
-    model = load_model(weights_file)
-    #with open(args.model, 'r') as jfile:
+    #model = load_model(weights_file)
+    with open(args.model, 'r') as jfile:
         # NOTE: if you saved the file by calling json.dump(model.to_json(), ...)
         # then you will have to call:
         #
-    #    model = model_from_json(json.loads(jfile.read()))
+        #    model = model_from_json(json.loads(jfile.read()))
         #
         # instead.
-        #model = model_from_json(jfile.read())
+        model = model_from_json(jfile.read())
 
 
-    #model.compile("adam", "mse")
-    #weights_file = args.model.replace('json', 'h5')
-    #model.load_weights(weights_file)
+    model.compile("adam", "mse")
+    weights_file = args.model.replace('json', 'h5')
+    model.load_weights(weights_file)
 
     # wrap Flask application with engineio's middleware
     app = socketio.Middleware(sio, app)

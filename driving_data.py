@@ -40,6 +40,9 @@ csv_data=np.recfromcsv(csv_file, delimiter=',', filling_values=np.nan, case_sens
 
 leftright = True
 flip = False
+blackSquares = True
+rotation = True
+cropImage = False
 
 i  = 0
 remove = 0
@@ -302,26 +305,30 @@ def process_image_comma_noaugment(name):
    return np.array(image)[None, :, :, :].transpose(0, 3, 1, 2)[0]
 
 
+def cropImage(image):
+    if cropImage:
+      top_crop = 55
+      bottom_crop = 135
+      image= image[top_crop:bottom_crop, :, :]
+    return image
+    
 
 def process_image_sully_pixels(image):
     image = np.copy (image)
-    top_crop = 55
-    bottom_crop = 135
     mean=0
 
-    #image= image[top_crop:bottom_crop, :, :]
+    #image = cropImage(image)
 
     (h, w) = image.shape[:2]
     #randomize brightness
-    #brightness = random.uniform (-0.3, 0.3)
-    #image = np.add(image, brightness)
     image = augment_brightness_camera_images(image)
 
     # black squares from Russian demo
-    rect_w = 25
-    rect_h = 25
-    rect_count = 30
-    for i in range (rect_count):
+    if blackSquares:
+      rect_w = 25
+      rect_h = 25
+      rect_count = 30
+      for i in range (rect_count):
         pt1 = (random.randint (0, w), random.randint (0, h))
         pt2 = (pt1[0] + rect_w, pt1[1] + rect_h)
         cv2.rectangle(image, pt1, pt2, (-0.5, -0.5, -0.5), -1)
@@ -331,14 +338,14 @@ def process_image_sully_pixels(image):
     rot = 1
     scale = 0.02
     Mrot = cv2.getRotationMatrix2D((h/2,w/2),random.uniform(-rot, rot), random.uniform(1.0 - scale, 1.0 + scale))
-
-    #affine transform and shifts
-    pts1 = np.float32([[0,0],[w,0],[w,h]])
-    a = 0
-    shift = 2
-    shiftx = random.randint (-shift, shift);
-    shifty = random.randint (-shift, shift);
-    pts2 = np.float32([[
+    if rotation:
+       #affine transform and shifts
+       pts1 = np.float32([[0,0],[w,0],[w,h]])
+       a = 0
+       shift = 2
+       shiftx = random.randint (-shift, shift);
+       shifty = random.randint (-shift, shift);
+       pts2 = np.float32([[
                 0 + random.randint (-a, a) + shiftx,
                 0 + random.randint (-a, a) + shifty
             ],[
@@ -348,9 +355,9 @@ def process_image_sully_pixels(image):
                 w + random.randint (-a, a) + shiftx,
                 h + random.randint (-a, a) + shifty
             ]])
-    M = cv2.getAffineTransform(pts1,pts2)
+       M = cv2.getAffineTransform(pts1,pts2)
 
-    image = cv2.warpAffine(
+       image = cv2.warpAffine(
             cv2.warpAffine (
                 image
                 , Mrot, (w, h)
@@ -358,9 +365,7 @@ def process_image_sully_pixels(image):
             , M, (w,h)
         )
 
-    #return np.float32(cv2.resize(image, (200, 66) )) / 255.0 
     image = cv2.resize(image, (200, 66) )
-    #image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
     image = np.subtract(np.divide(np.array(image).astype(np.float32), 255.0), 0.5)
     return image
 
@@ -441,7 +446,8 @@ def process_image_gray(name):
 def open_image_sully(name):
    if 'flip' == name[0:4]:
       name = name[4:]
-      image = cv2.imread(name)
+      #image = cv2.imread(name)
+      image = np.array(Image.open(name))
       image = cv2.flip(image, 1)
    else: 
       #image = cv2.imread(name)

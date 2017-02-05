@@ -18,10 +18,11 @@ def atan_layer(x):
 def atan_layer_shape(input_shape):
     return input_shape
 
-def normal_init(shape, name=None):
+def normal_init2(shape, name=None):
   initial = tf.truncated_normal(shape, stddev=0.1)
   return K.variable(initial)
 
+normal_init = 'normal'
 
 from keras.layers import Input, LSTM, Dense, merge
 from keras.models import Model
@@ -76,38 +77,29 @@ def nvidia_net():
     model = Sequential()
     #lambda?
     p=0.33
-    model.add(Convolution2D(24, 5, 5, init = 'he_normal', subsample= (2, 2), name='conv1_1', border_mode='valid',input_shape=(66, 200, 3)))
-    #model.add(ELU())
+    model.add(Convolution2D(24, 5, 5, init = 'normal', subsample= (2, 2), name='conv1_1', border_mode='valid',input_shape=(66, 200, 3)))
     model.add(Activation('relu'))
-    model.add(Convolution2D(36, 5, 5, init = 'he_normal', subsample= (2, 2), border_mode='valid',name='conv2_1'))
-    #model.add(ELU())
+    model.add(Convolution2D(36, 5, 5, init = 'normal', subsample= (2, 2), border_mode='valid',name='conv2_1'))
     model.add(Activation('relu'))
-    model.add(Convolution2D(48, 5, 5, init = 'he_normal', subsample= (2, 2), border_mode='valid',name='conv3_1'))
-    #model.add(ELU())
+    model.add(Convolution2D(48, 5, 5, init = 'normal', subsample= (2, 2), border_mode='valid',name='conv3_1'))
     model.add(Activation('relu'))
-    model.add(Convolution2D(64, 3, 3, init = 'he_normal', subsample= (1, 1), border_mode='valid',name='conv4_1'))
-    #model.add(ELU())
+    model.add(Convolution2D(64, 3, 3, init = 'normal', subsample= (1, 1), border_mode='valid',name='conv4_1'))
     model.add(Activation('relu'))
-    model.add(Convolution2D(64, 3, 3, init = 'he_normal', subsample= (1, 1), border_mode='valid',name='conv4_2'))
-    #model.add(ELU())
+    model.add(Convolution2D(64, 3, 3, init = 'normal', subsample= (1, 1), border_mode='valid',name='conv4_2'))
     model.add(Activation('relu'))
     model.add(Flatten())
-    model.add(Dense(1164, init = 'he_normal', name = "dense_0"))
-    #model.add(ELU())
+    model.add(Dense(1164, init = 'normal', name = "dense_0"))
     model.add(Activation('relu'))
     model.add(Dropout(p))
-    model.add(Dense(100, init = 'he_normal',  name = "dense_1"))
-    #model.add(ELU())
+    model.add(Dense(100, init = 'normal',  name = "dense_1"))
     model.add(Activation('relu'))
     model.add(Dropout(p))
-    model.add(Dense(50, init = 'he_normal', name = "dense_2"))
-    #model.add(ELU())
+    model.add(Dense(50, init = 'normal', name = "dense_2"))
     model.add(Activation('relu'))
     model.add(Dropout(p))
-    model.add(Dense(10, init = 'he_normal', name = "dense_3"))
-    #model.add(ELU())
+    model.add(Dense(10, init = 'normal', name = "dense_3"))
     model.add(Activation('tanh'))
-    model.add(Dense(1, init = 'he_normal', name = "dense_4"))
+    model.add(Dense(1, init = 'normal', name = "dense_4"))
 
     return model
     
