@@ -40,7 +40,7 @@ csv_data=np.recfromcsv(csv_file, delimiter=',', filling_values=np.nan, case_sens
 
 leftright = True
 flip = False
-blackSquares = True
+blackSquares = False
 rotation = True
 cropImage = False
 
